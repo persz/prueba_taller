@@ -5,10 +5,9 @@
  * Solo admin puede eliminar.
  * Base path: /api/v1/clientes
  */
-
-const express  = require('express');
-const router   = express.Router();
-const { verifyToken }   = require('../../middlewares/auth.middleware');
+const express = require('express');
+const router  = express.Router();
+const { verifyToken } = require('../../middlewares/auth.middleware');
 const { soloAdmin, adminOEmpleado } = require('../../middlewares/roles.middleware');
 const { validar }       = require('../../middlewares/validate.middleware');
 const {
