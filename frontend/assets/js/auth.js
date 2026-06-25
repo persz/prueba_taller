@@ -1,38 +1,35 @@
 /**
- * auth.js
- * Manejo de sesion, token JWT y control de acceso por rol.
- * Se carga antes del router para garantizar que el usuario este autenticado.
+ * @file auth.js
+ * @description Manejo de autenticacion JWT en el frontend.
+ * Guarda y recupera el token de localStorage.
+ * Protege las paginas que requieren sesion activa.
  */
 
 const Auth = {
-
   /**
-   * Retorna el usuario guardado en localStorage.
+   * Retorna el token JWT almacenado.
    */
-  getUsuario() {
-    try {
-      return JSON.parse(localStorage.getItem('usuario')) || null;
-    } catch {
-      return null;
-    }
+  getToken() {
+    return localStorage.getItem('token');
   },
 
   /**
-   * Retorna el token JWT.
+   * Retorna los datos del usuario autenticado.
    */
-  getToken() {
-    return localStorage.getItem('token') || null;
+  getUsuario() {
+    const usuario = localStorage.getItem('usuario');
+    return usuario ? JSON.parse(usuario) : null;
   },
 
   /**
    * Verifica si hay una sesion activa.
    */
-  isLoggedIn() {
-    return !!this.getToken() && !!this.getUsuario();
+  isAuthenticated() {
+    return !!this.getToken();
   },
 
   /**
-   * Verifica si el usuario autenticado es administrador.
+   * Verifica si el usuario es administrador.
    */
   isAdmin() {
     const usuario = this.getUsuario();
@@ -44,50 +41,33 @@ const Auth = {
    * y redirige al login.
    */
   logout() {
-    api.post('/auth/logout').catch(() => {});
     localStorage.removeItem('token');
     localStorage.removeItem('usuario');
     window.location.href = 'index.html';
   },
 
   /**
-   * Inicializa la sesion en el dashboard.
-   * Redirige al login si no hay sesion activa.
-   * Configura la UI segun el rol del usuario.
+   * Protege una pagina verificando que haya sesion activa.
+   * Si no hay sesion, redirige al login.
+   * Llamar al inicio de cada pagina protegida.
    */
-  init() {
-    if (!this.isLoggedIn()) {
+  requireAuth() {
+    if (!this.isAuthenticated()) {
       window.location.href = 'index.html';
-      return;
+      return false;
     }
+    return true;
+  },
 
-    const usuario = this.getUsuario();
-
-    // Datos del usuario en sidebar
-    const avatarEl   = document.getElementById('user-avatar');
-    const nameEl     = document.getElementById('user-name');
-    const roleEl     = document.getElementById('user-role');
-    const topbarUser = document.getElementById('topbar-user');
-
-    if (avatarEl)   avatarEl.textContent   = usuario.nombre.charAt(0).toUpperCase();
-    if (nameEl)     nameEl.textContent     = usuario.nombre;
-    if (roleEl)     roleEl.textContent     = usuario.rol === 'admin' ? 'Administrador' : 'Empleado';
-    if (topbarUser) topbarUser.textContent = usuario.nombre;
-
-    // Ocultar elementos exclusivos de admin si el usuario es empleado
+  /**
+   * Protege una pagina verificando que el usuario sea admin.
+   * Si no es admin, redirige al dashboard.
+   */
+  requireAdmin() {
     if (!this.isAdmin()) {
-      document.querySelectorAll('.admin-only').forEach(el => {
-        el.style.display = 'none';
-      });
+      window.location.href = 'dashboard.html';
+      return false;
     }
-
-    // Boton de logout
-    const btnLogout = document.getElementById('btn-logout');
-    if (btnLogout) {
-      btnLogout.addEventListener('click', () => this.logout());
-    }
+    return true;
   },
 };
-
-// Inicializar al cargar
-Auth.init();

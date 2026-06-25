@@ -1,9 +1,9 @@
 /**
- * views/ordenes.js
- * Vista de gestion de Ordenes de Trabajo.
+ * @file ordenes.js
+ * @description Vista de gestion de Ordenes de Trabajo.
  */
 
-Views.ordenes = async function () {
+Views.ordenes = async () => {
   const contentArea = document.getElementById('content-area');
   const esAdmin     = Auth.isAdmin();
 
@@ -11,11 +11,11 @@ Views.ordenes = async function () {
     <div class="page-header">
       <div>
         <h2 class="page-title">Ordenes de Trabajo</h2>
-        <p class="page-subtitle">Gestion de ordenes activas e historial</p>
+        <p class="page-subtitle">Gestion de servicios y reparaciones</p>
       </div>
       <button class="btn btn-primary" id="btn-nueva-ot">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2" style="width:16px;height:16px;">
+             stroke="currentColor" stroke-width="2">
           <line x1="12" y1="5" x2="12" y2="19"/>
           <line x1="5" y1="12" x2="19" y2="12"/>
         </svg>
@@ -23,93 +23,154 @@ Views.ordenes = async function () {
       </button>
     </div>
 
-    <div class="toolbar">
-      <div class="search-box">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="8"/>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-        </svg>
-        <input type="text" class="form-control" id="input-buscar-ot"
-               placeholder="Buscar por ID, cliente, placa o VIN..." />
-      </div>
-      <div style="display:flex; gap:var(--spacing-sm); flex-wrap:wrap;">
-        <button class="btn btn-secondary btn-sm filtro-estado active" data-estado="">Todas</button>
-        <button class="btn btn-secondary btn-sm filtro-estado" data-estado="Pendiente">Pendiente</button>
-        <button class="btn btn-secondary btn-sm filtro-estado" data-estado="En Proceso">En Proceso</button>
-        <button class="btn btn-secondary btn-sm filtro-estado" data-estado="Completada">Completada</button>
-        <button class="btn btn-secondary btn-sm filtro-estado" data-estado="Cancelada">Cancelada</button>
-      </div>
-    </div>
-
     <div class="table-container">
       <table class="table">
         <thead>
           <tr>
-            <th>OT</th>
+            <th>ID</th>
             <th>Cliente</th>
             <th>Vehiculo</th>
-            <th>Placa</th>
-            <th>Estado</th>
             <th>Mecanico</th>
-            <th>Fecha</th>
+            <th>Estado</th>
+            <th>Fecha Ingreso</th>
             <th>Acciones</th>
           </tr>
         </thead>
         <tbody id="tabla-ordenes">
           <tr>
-            <td colspan="8" style="text-align:center; padding:var(--spacing-xl);">
-              <div class="spinner" style="margin:0 auto;"></div>
+            <td colspan="7" class="text-center">
+              <div class="spinner" style="margin: var(--spacing-lg) auto;"></div>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
+
+    <!-- Modal nueva OT -->
+    <div class="modal-overlay hidden" id="modal-ot">
+      <div class="modal">
+        <div class="modal-header">
+          <h3 class="modal-title">Nueva Orden de Trabajo</h3>
+          <button class="modal-close" id="btn-cerrar-modal-ot">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Cliente</label>
+            <select class="form-control" id="ot-id-cliente">
+              <option value="">Selecciona un cliente...</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">VIN / Numero de Chasis</label>
+            <div style="display: flex; gap: var(--spacing-sm);">
+              <input type="text" class="form-control" id="ot-vin"
+                     placeholder="17 caracteres" maxlength="17"
+                     style="text-transform: uppercase;">
+              <button class="btn btn-secondary" id="btn-decode-vin">Buscar</button>
+            </div>
+          </div>
+
+          <div id="ot-vehiculo-info" class="hidden">
+            <div class="alert alert-info mb-md">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              <span id="ot-vehiculo-texto"></span>
+            </div>
+          </div>
+
+          <div class="form-row form-row-2">
+            <div class="form-group">
+              <label class="form-label">Marca</label>
+              <input type="text" class="form-control" id="ot-marca" placeholder="Marca">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Modelo</label>
+              <input type="text" class="form-control" id="ot-modelo" placeholder="Modelo">
+            </div>
+          </div>
+
+          <div class="form-row form-row-2">
+            <div class="form-group">
+              <label class="form-label">Año</label>
+              <input type="number" class="form-control" id="ot-anio"
+                     placeholder="2024" min="1900" max="2030">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Placa</label>
+              <input type="text" class="form-control" id="ot-placa"
+                     placeholder="A123456" style="text-transform: uppercase;">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Mecanico Asignado</label>
+            <input type="text" class="form-control" id="ot-mecanico"
+                   placeholder="Nombre del mecanico">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Descripcion del Trabajo</label>
+            <textarea class="form-control" id="ot-descripcion" rows="3"
+                      placeholder="Describe el trabajo a realizar..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="btn-cancelar-ot">Cancelar</button>
+          <button class="btn btn-primary" id="btn-guardar-ot">Crear OT</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal detalle OT -->
+    <div class="modal-overlay hidden" id="modal-detalle-ot">
+      <div class="modal" style="max-width: 700px;">
+        <div class="modal-header">
+          <h3 class="modal-title" id="modal-detalle-titulo">Detalle OT</h3>
+          <button class="modal-close" id="btn-cerrar-detalle-ot">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body" id="modal-detalle-body">
+        </div>
+        <div class="modal-footer" id="modal-detalle-footer">
+        </div>
+      </div>
+    </div>
   `;
 
-  let todasLasOrdenes = [];
-  let filtroEstado    = '';
-
-  function badgeEstado(estado) {
-    const map = {
-      'Pendiente':  'badge-pendiente',
-      'En Proceso': 'badge-proceso',
-      'Completada': 'badge-completada',
-      'Cancelada':  'badge-cancelada',
-    };
-    return `<span class="badge ${map[estado] || ''}">${estado}</span>`;
-  }
-
-  function filtrarYRenderizar(termino = '') {
-    let resultado = todasLasOrdenes;
-
-    if (filtroEstado) {
-      resultado = resultado.filter(o => o.estado === filtroEstado);
+  // Cargar ordenes
+  const cargarOrdenes = async () => {
+    try {
+      const data = await Api.getOrdenes();
+      renderTabla(data.ordenes);
+    } catch (error) {
+      Toast.error('Error al cargar ordenes: ' + error.message);
     }
+  };
 
-    if (termino.trim()) {
-      const t = termino.toLowerCase();
-      resultado = resultado.filter(o =>
-        o.id_unico_ot.toLowerCase().includes(t)     ||
-        o.nombre_cliente.toLowerCase().includes(t)  ||
-        o.placa.toLowerCase().includes(t)            ||
-        o.vin.toLowerCase().includes(t)
-      );
-    }
-
-    renderTabla(resultado);
-  }
-
-  function renderTabla(ordenes) {
+  const renderTabla = (ordenes) => {
     const tbody = document.getElementById('tabla-ordenes');
-    if (!tbody) return;
 
     if (ordenes.length === 0) {
       tbody.innerHTML = `
         <tr>
-          <td colspan="8" style="text-align:center; color:var(--text-disabled);
-                                  padding:var(--spacing-xl);">
-            No se encontraron ordenes de trabajo.
+          <td colspan="7">
+            <div class="empty-state"><p>No hay ordenes de trabajo registradas.</p></div>
           </td>
         </tr>
       `;
@@ -118,636 +179,326 @@ Views.ordenes = async function () {
 
     tbody.innerHTML = ordenes.map(o => `
       <tr>
-        <td class="font-mono" style="color:var(--accent); font-size:0.8rem;">
-          ${o.id_unico_ot}
+        <td class="font-mono">${o.id_unico_ot}</td>
+        <td>${o.nombre_cliente}</td>
+        <td>${o.marca} ${o.modelo} ${o.anio}</td>
+        <td>${o.mecanico_asignado || '-'}</td>
+        <td>
+          <span class="badge badge-${o.estado.toLowerCase().replace(' ', '')}">
+            ${o.estado}
+          </span>
         </td>
-        <td style="color:var(--text-primary); font-weight:500;">
-          ${o.nombre_cliente}
-        </td>
-        <td style="color:var(--text-secondary);">
-          ${o.marca} ${o.modelo} ${o.anio}
-        </td>
-        <td class="font-mono" style="font-size:0.8rem;">${o.placa}</td>
-        <td>${badgeEstado(o.estado)}</td>
-        <td style="color:var(--text-secondary);">${o.mecanico_asignado || '—'}</td>
-        <td style="font-size:0.8rem; color:var(--text-secondary);">
-          ${new Date(o.fecha_ingreso).toLocaleDateString('es-DO')}
-        </td>
+        <td>${new Date(o.fecha_ingreso).toLocaleDateString('es-DO')}</td>
         <td>
           <div class="table-actions">
-            <button class="btn btn-secondary btn-sm"
-                    onclick="verDetalleOT('${o.id_unico_ot}')">
+            <button class="btn btn-secondary btn-sm" onclick="verDetalleOT('${o.id_unico_ot}')">
               Ver
             </button>
-            <button class="btn btn-secondary btn-sm"
-                    onclick="cambiarEstadoOT('${o.id_unico_ot}', '${o.estado}')">
-              Estado
-            </button>
-            ${o.estado === 'Completada' ? `
-            <button class="btn btn-success btn-sm"
-                    onclick="generarFacturaDesdeOT('${o.id_unico_ot}')">
-              Facturar
-            </button>
-            ` : ''}
-            ${(esAdmin || o.id_usuario_creador === Auth.getUsuario().id_usuario) ? `
-            <button class="btn btn-danger btn-sm"
-                    onclick="eliminarOT('${o.id_unico_ot}')">
-              Eliminar
-            </button>
+            ${(esAdmin || true) ? `
+              <button class="btn btn-danger btn-sm" onclick="eliminarOT('${o.id_unico_ot}')">
+                Eliminar
+              </button>
             ` : ''}
           </div>
         </td>
       </tr>
     `).join('');
-  }
-
-  async function cargarOrdenes() {
-    const res = await api.get('/ordenes');
-    if (res.ok) {
-      todasLasOrdenes = res.data.ordenes;
-      filtrarYRenderizar();
-    } else {
-      Toast.show('Error al cargar ordenes.', 'error');
-    }
-  }
-
-  await cargarOrdenes();
-
-  // Filtros de estado
-  document.querySelectorAll('.filtro-estado').forEach(btn => {
-    btn.addEventListener('click', function () {
-      document.querySelectorAll('.filtro-estado').forEach(b => b.classList.remove('active'));
-      this.classList.add('active');
-      filtroEstado = this.dataset.estado;
-      filtrarYRenderizar(document.getElementById('input-buscar-ot').value);
-    });
-  });
-
-  // Busqueda
-  document.getElementById('input-buscar-ot').addEventListener('input', function () {
-    filtrarYRenderizar(this.value);
-  });
-
-  // Nueva OT
-  document.getElementById('btn-nueva-ot').addEventListener('click', () => {
-    abrirModalOrden(null, cargarOrdenes);
-  });
-
-  // Funciones globales
-  window.verDetalleOT = async (id_ot) => {
-    const res = await api.get(`/ordenes/${id_ot}`);
-    if (res.ok) abrirModalDetalleOT(res.data, cargarOrdenes);
-    else Toast.show('Error al cargar detalle de la OT.', 'error');
   };
 
-  window.cambiarEstadoOT = (id_ot, estadoActual) => {
-    abrirModalEstado(id_ot, estadoActual, cargarOrdenes);
-  };
-
-  window.eliminarOT = async (id_ot) => {
-    if (!confirm(`Eliminar la OT ${id_ot}? Esta accion no se puede deshacer.`)) return;
-    const res = await api.delete(`/ordenes/${id_ot}`);
-    if (res.ok) {
-      Toast.show('Orden de Trabajo eliminada.', 'success');
-      cargarOrdenes();
-    } else {
-      Toast.show(res.data.mensaje || 'Error al eliminar OT.', 'error');
-    }
-  };
-
-  window.generarFacturaDesdeOT = async (id_ot) => {
-    if (!confirm(`Generar factura para la OT ${id_ot}?`)) return;
-    const res = await api.post('/facturas/generar', { id_unico_ot: id_ot });
-    if (res.ok) {
-      Toast.show('Factura generada exitosamente.', 'success');
-      Router.navigate('facturas');
-    } else {
-      Toast.show(res.data.mensaje || 'Error al generar factura.', 'error');
-    }
-  };
-};
-
-// Modal crear OT
-window.abrirModalOrden = async function (datos, onSuccess, vehiculoPrefill = null) {
   // Cargar clientes para el select
-  const resClientes = await api.get('/clientes');
-  if (!resClientes.ok) {
-    Toast.show('Error al cargar clientes.', 'error');
-    return;
-  }
-  const clientes = resClientes.data.clientes;
+  const cargarClientes = async () => {
+    try {
+      const data   = await Api.getClientes();
+      const select = document.getElementById('ot-id-cliente');
+      data.clientes.forEach(c => {
+        const option   = document.createElement('option');
+        option.value   = c.id_cliente;
+        option.textContent = `${c.nombre_completo} (${c.cedula_rnc})`;
+        select.appendChild(option);
+      });
+    } catch (error) {
+      Toast.error('Error al cargar clientes.');
+    }
+  };
 
-  const modal = document.createElement('div');
-  modal.className = 'modal-overlay';
-  modal.innerHTML = `
-    <div class="modal" style="max-width:680px;">
-      <div class="modal-header">
-        <span class="modal-title">Nueva Orden de Trabajo</span>
-        <button class="modal-close" id="modal-close">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" stroke-width="2" style="width:18px;height:18px;">
-            <line x1="18" y1="6" x2="6" y2="18"/>
-            <line x1="6" y1="6" x2="18" y2="18"/>
-          </svg>
-        </button>
-      </div>
-      <div class="modal-body">
+  // Abrir modal nueva OT
+  document.getElementById('btn-nueva-ot').addEventListener('click', () => {
+    document.getElementById('ot-id-cliente').value  = '';
+    document.getElementById('ot-vin').value         = '';
+    document.getElementById('ot-marca').value       = '';
+    document.getElementById('ot-modelo').value      = '';
+    document.getElementById('ot-anio').value        = '';
+    document.getElementById('ot-placa').value       = '';
+    document.getElementById('ot-mecanico').value    = '';
+    document.getElementById('ot-descripcion').value = '';
+    document.getElementById('ot-vehiculo-info').classList.add('hidden');
+    document.getElementById('modal-ot').classList.remove('hidden');
+    cargarClientes();
+  });
 
-        <div class="form-group">
-          <label class="form-label">Cliente</label>
-          <select class="form-control" id="id_cliente">
-            <option value="">Selecciona un cliente...</option>
-            ${clientes.map(c => `
-              <option value="${c.id_cliente}">${c.nombre_completo} — ${c.cedula_rnc}</option>
-            `).join('')}
-          </select>
-        </div>
+  const cerrarModalOT = () => {
+    document.getElementById('modal-ot').classList.add('hidden');
+  };
 
-        <div style="border:1px solid var(--border); border-radius:var(--radius-md);
-                    padding:var(--spacing-md); margin-bottom:var(--spacing-md);">
-          <div style="font-size:0.8rem; font-weight:600; color:var(--text-secondary);
-                      margin-bottom:var(--spacing-md); text-transform:uppercase;
-                      letter-spacing:0.5px;">
-            Datos del Vehiculo
-          </div>
-          <div style="display:flex; gap:var(--spacing-sm); margin-bottom:var(--spacing-md);">
-            <input type="text" class="form-control font-mono" id="vin"
-                   placeholder="VIN (17 caracteres)"
-                   maxlength="17"
-                   style="text-transform:uppercase; flex:1;"
-                   value="${vehiculoPrefill ? vehiculoPrefill.vin : ''}" />
-            <button class="btn btn-secondary btn-sm" id="btn-decodificar-vin"
-                    style="white-space:nowrap;">
-              Decodificar VIN
-            </button>
-          </div>
-          <div class="form-row form-row-2">
-            <div class="form-group" style="margin-bottom:0;">
-              <label class="form-label">Marca</label>
-              <input type="text" class="form-control" id="marca"
-                     placeholder="HONDA"
-                     value="${vehiculoPrefill ? vehiculoPrefill.marca : ''}" />
-            </div>
-            <div class="form-group" style="margin-bottom:0;">
-              <label class="form-label">Modelo</label>
-              <input type="text" class="form-control" id="modelo"
-                     placeholder="Civic"
-                     value="${vehiculoPrefill ? vehiculoPrefill.modelo : ''}" />
-            </div>
-          </div>
-          <div class="form-row form-row-2" style="margin-top:var(--spacing-md);">
-            <div class="form-group" style="margin-bottom:0;">
-              <label class="form-label">Año</label>
-              <input type="number" class="form-control" id="anio"
-                     placeholder="2020" min="1900" max="2099"
-                     value="${vehiculoPrefill ? vehiculoPrefill.anio : ''}" />
-            </div>
-            <div class="form-group" style="margin-bottom:0;">
-              <label class="form-label">Placa</label>
-              <input type="text" class="form-control font-mono" id="placa"
-                     placeholder="A123456"
-                     style="text-transform:uppercase;" />
-            </div>
-          </div>
-        </div>
+  document.getElementById('btn-cerrar-modal-ot').addEventListener('click', cerrarModalOT);
+  document.getElementById('btn-cancelar-ot').addEventListener('click', cerrarModalOT);
 
-        <div class="form-group">
-          <label class="form-label">Descripcion del Trabajo</label>
-          <textarea class="form-control" id="descripcion_trabajo" rows="3"
-                    placeholder="Describe el trabajo a realizar..."></textarea>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">
-            Mecanico Asignado
-            <span style="color:var(--text-disabled);">(opcional)</span>
-          </label>
-          <input type="text" class="form-control" id="mecanico_asignado"
-                 placeholder="Nombre del mecanico responsable" />
-        </div>
-
-        <div id="form-error" class="alert alert-danger hidden"></div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" id="btn-cancelar">Cancelar</button>
-        <button class="btn btn-primary" id="btn-guardar">Crear Orden de Trabajo</button>
-      </div>
-    </div>
-  `;
-
-  document.body.appendChild(modal);
-
-  const cerrar = () => modal.remove();
-  document.getElementById('modal-close').addEventListener('click', cerrar);
-  document.getElementById('btn-cancelar').addEventListener('click', cerrar);
-  modal.addEventListener('click', (e) => { if (e.target === modal) cerrar(); });
-
-  // Decodificar VIN desde el modal
-  document.getElementById('btn-decodificar-vin').addEventListener('click', async () => {
-    const vin = document.getElementById('vin').value.trim().toUpperCase();
+  // Decodificar VIN
+  document.getElementById('btn-decode-vin').addEventListener('click', async () => {
+    const vin = document.getElementById('ot-vin').value.trim().toUpperCase();
     if (vin.length !== 17) {
-      Toast.show('El VIN debe tener 17 caracteres.', 'warning');
+      Toast.error('El VIN debe tener exactamente 17 caracteres.');
       return;
     }
-    const res = await api.get(`/vehiculos/vin/${vin}`);
-    if (res.ok) {
-      const v = res.data.vehiculo;
-      document.getElementById('marca').value  = v.marca  !== 'No disponible' ? v.marca  : '';
-      document.getElementById('modelo').value = v.modelo !== 'No disponible' ? v.modelo : '';
-      document.getElementById('anio').value   = v.anio   !== 'No disponible' ? v.anio   : '';
-      Toast.show('Datos del vehiculo cargados exitosamente.', 'success');
-    } else {
-      Toast.show(res.data.mensaje || 'No se pudo decodificar el VIN.', 'error');
+    try {
+      const data     = await Api.decodificarVIN(vin);
+      const vehiculo = data.vehiculo;
+      document.getElementById('ot-marca').value  = vehiculo.marca;
+      document.getElementById('ot-modelo').value = vehiculo.modelo;
+      document.getElementById('ot-anio').value   = vehiculo.anio;
+      document.getElementById('ot-vehiculo-info').classList.remove('hidden');
+      document.getElementById('ot-vehiculo-texto').textContent =
+        `Vehiculo identificado: ${vehiculo.marca} ${vehiculo.modelo} ${vehiculo.anio}`;
+      Toast.success('Vehiculo identificado exitosamente.');
+    } catch (error) {
+      Toast.error('No se pudo decodificar el VIN: ' + error.message);
     }
   });
 
-  // Forzar mayusculas en VIN y placa
-  document.getElementById('vin').addEventListener('input', function () {
-    this.value = this.value.toUpperCase();
-  });
-  document.getElementById('placa').addEventListener('input', function () {
-    this.value = this.value.toUpperCase();
-  });
-
-  document.getElementById('btn-guardar').addEventListener('click', async () => {
-    const errorEl = document.getElementById('form-error');
-
+  // Guardar OT
+  document.getElementById('btn-guardar-ot').addEventListener('click', async () => {
     const body = {
-      id_cliente:          parseInt(document.getElementById('id_cliente').value),
-      vin:                 document.getElementById('vin').value.trim(),
-      placa:               document.getElementById('placa').value.trim(),
-      marca:               document.getElementById('marca').value.trim(),
-      modelo:              document.getElementById('modelo').value.trim(),
-      anio:                parseInt(document.getElementById('anio').value),
-      descripcion_trabajo: document.getElementById('descripcion_trabajo').value.trim(),
-      mecanico_asignado:   document.getElementById('mecanico_asignado').value.trim() || null,
+      id_cliente:          parseInt(document.getElementById('ot-id-cliente').value),
+      vin:                 document.getElementById('ot-vin').value.trim().toUpperCase(),
+      placa:               document.getElementById('ot-placa').value.trim().toUpperCase(),
+      marca:               document.getElementById('ot-marca').value.trim(),
+      modelo:              document.getElementById('ot-modelo').value.trim(),
+      anio:                parseInt(document.getElementById('ot-anio').value),
+      mecanico_asignado:   document.getElementById('ot-mecanico').value.trim(),
+      descripcion_trabajo: document.getElementById('ot-descripcion').value.trim(),
     };
 
-    if (!body.id_cliente || !body.vin || !body.placa || !body.marca ||
-        !body.modelo || !body.anio || !body.descripcion_trabajo) {
-      errorEl.textContent = 'Todos los campos obligatorios deben estar completos.';
-      errorEl.classList.remove('hidden');
+    if (!body.id_cliente || !body.vin || !body.placa || !body.marca || !body.modelo || !body.anio || !body.descripcion_trabajo) {
+      Toast.error('Todos los campos son obligatorios excepto el mecanico.');
       return;
     }
 
-    if (body.vin.length !== 17) {
-      errorEl.textContent = 'El VIN debe tener exactamente 17 caracteres.';
-      errorEl.classList.remove('hidden');
-      return;
-    }
-
-    errorEl.classList.add('hidden');
-
-    const res = await api.post('/ordenes', body);
-
-    if (res.ok) {
-      Toast.show('Orden de Trabajo creada exitosamente.', 'success');
-      cerrar();
-      if (onSuccess) onSuccess();
-
-      // Preguntar si desea agregar piezas
-      setTimeout(() => {
-        if (confirm(`OT ${res.data.orden.id_unico_ot} creada. Deseas agregar piezas ahora?`)) {
-          abrirModalDetalleOT(
-            { orden: res.data.orden, piezas: [] },
-            onSuccess
-          );
-        }
-      }, 300);
-    } else {
-      errorEl.textContent = res.data.mensaje || 'Error al crear la orden.';
-      errorEl.classList.remove('hidden');
+    try {
+      await Api.crearOrden(body);
+      Toast.success('Orden de Trabajo creada exitosamente.');
+      cerrarModalOT();
+      cargarOrdenes();
+    } catch (error) {
+      Toast.error(error.message);
     }
   });
-};
 
-// Modal detalle OT con piezas
-function abrirModalDetalleOT(data, onSuccess) {
-  const { orden, piezas } = data;
+  // Ver detalle OT
+  window.verDetalleOT = async (id) => {
+    try {
+      const data   = await Api.getOrden(id);
+      const orden  = data.orden;
+      const piezas = data.piezas;
 
-  const modal = document.createElement('div');
-  modal.className = 'modal-overlay';
-  modal.innerHTML = `
-    <div class="modal" style="max-width:760px;">
-      <div class="modal-header">
-        <span class="modal-title">OT: ${orden.id_unico_ot}</span>
-        <button class="modal-close" id="modal-close">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" stroke-width="2" style="width:18px;height:18px;">
-            <line x1="18" y1="6" x2="6" y2="18"/>
-            <line x1="6" y1="6" x2="18" y2="18"/>
-          </svg>
-        </button>
-      </div>
-      <div class="modal-body">
+      document.getElementById('modal-detalle-titulo').textContent = `OT: ${orden.id_unico_ot}`;
 
-        <!-- Info OT -->
-        <div style="display:grid; grid-template-columns:repeat(2,1fr);
-                    gap:var(--spacing-md); margin-bottom:var(--spacing-lg);">
+      document.getElementById('modal-detalle-body').innerHTML = `
+        <div class="grid-2" style="gap: var(--spacing-md); margin-bottom: var(--spacing-lg);">
           <div>
-            <div class="form-label">Cliente</div>
-            <div style="color:var(--text-primary); font-weight:500;">
-              ${orden.nombre_cliente}
-            </div>
+            <p class="form-label">Cliente</p>
+            <p style="color: var(--text-primary); margin: 0; font-weight: 600;">${orden.nombre_cliente}</p>
+            <p style="margin: 0; font-size: 0.8rem;">${orden.cedula_rnc_cliente}</p>
           </div>
           <div>
-            <div class="form-label">Estado</div>
-            <div>
-              <span class="badge badge-${(orden.estado || '').toLowerCase().replace(' ','-')}">
-                ${orden.estado}
-              </span>
-            </div>
+            <p class="form-label">Vehiculo</p>
+            <p style="color: var(--text-primary); margin: 0; font-weight: 600;">${orden.marca} ${orden.modelo} ${orden.anio}</p>
+            <p style="margin: 0; font-size: 0.8rem;">Placa: ${orden.placa} | VIN: ${orden.vin}</p>
           </div>
           <div>
-            <div class="form-label">Vehiculo</div>
-            <div style="color:var(--text-primary);">
-              ${orden.marca} ${orden.modelo} ${orden.anio}
-            </div>
+            <p class="form-label">Mecanico</p>
+            <p style="color: var(--text-primary); margin: 0;">${orden.mecanico_asignado || 'No asignado'}</p>
           </div>
           <div>
-            <div class="form-label">Placa</div>
-            <div class="font-mono" style="color:var(--accent);">${orden.placa}</div>
+            <p class="form-label">Estado</p>
+            <span class="badge badge-${orden.estado.toLowerCase().replace(' ', '')}">${orden.estado}</span>
           </div>
-          <div style="grid-column:1/-1;">
-            <div class="form-label">Descripcion</div>
-            <div style="color:var(--text-secondary);">${orden.descripcion_trabajo}</div>
-          </div>
+        </div>
+
+        <div class="form-group">
+          <p class="form-label">Descripcion del Trabajo</p>
+          <p style="color: var(--text-primary); margin: 0;">${orden.descripcion_trabajo}</p>
         </div>
 
         <hr class="divider">
 
-        <!-- Piezas asociadas -->
-        <div style="display:flex; justify-content:space-between; align-items:center;
-                    margin-bottom:var(--spacing-md);">
-          <span style="font-weight:600; color:var(--text-primary);">Piezas Utilizadas</span>
-          ${orden.estado !== 'Completada' && orden.estado !== 'Cancelada' ? `
-          <button class="btn btn-primary btn-sm" id="btn-agregar-pieza">
-            Agregar Pieza
+        <h4 style="margin-bottom: var(--spacing-md);">Piezas Utilizadas</h4>
+
+        ${piezas.length === 0 ? `
+          <div class="empty-state">
+            <p>No hay piezas agregadas a esta OT.</p>
+          </div>
+        ` : `
+          <div class="table-container">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>SKU</th>
+                  <th>Pieza</th>
+                  <th>Cantidad</th>
+                  <th>Precio Unit.</th>
+                  <th>Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${piezas.map(p => `
+                  <tr>
+                    <td class="font-mono">${p.codigo_sku}</td>
+                    <td>${p.nombre_pieza}</td>
+                    <td>${p.cantidad_pieza}</td>
+                    <td>RD$ ${parseFloat(p.precio_venta).toLocaleString('es-DO')}</td>
+                    <td>RD$ ${parseFloat(p.subtotal).toLocaleString('es-DO')}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+          <div style="text-align: right; margin-top: var(--spacing-md);">
+            <strong style="color: var(--accent);">
+              Total Piezas: RD$ ${piezas.reduce((acc, p) => acc + parseFloat(p.subtotal), 0).toLocaleString('es-DO')}
+            </strong>
+          </div>
+        `}
+
+        <hr class="divider">
+
+        <div class="form-group">
+          <label class="form-label">Agregar Pieza</label>
+          <div style="display: flex; gap: var(--spacing-sm); flex-wrap: wrap;">
+            <select class="form-control" id="select-pieza" style="flex: 2;">
+              <option value="">Selecciona una pieza...</option>
+            </select>
+            <input type="number" class="form-control" id="cantidad-pieza"
+                   placeholder="Cant." min="1" style="flex: 1; max-width: 100px;">
+            <button class="btn btn-primary" id="btn-agregar-pieza">Agregar</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Actualizar Estado</label>
+          <div style="display: flex; gap: var(--spacing-sm);">
+            <select class="form-control" id="select-estado">
+              <option value="Pendiente"  ${orden.estado === 'Pendiente'  ? 'selected' : ''}>Pendiente</option>
+              <option value="En Proceso" ${orden.estado === 'En Proceso' ? 'selected' : ''}>En Proceso</option>
+              <option value="Completada" ${orden.estado === 'Completada' ? 'selected' : ''}>Completada</option>
+              <option value="Cancelada"  ${orden.estado === 'Cancelada'  ? 'selected' : ''}>Cancelada</option>
+            </select>
+            <button class="btn btn-secondary" id="btn-actualizar-estado">Actualizar</button>
+          </div>
+        </div>
+      `;
+
+      // Cargar piezas en el select
+      const selectPieza = document.getElementById('select-pieza');
+      const dataPiezas  = await Api.getPiezas();
+      dataPiezas.piezas.forEach(p => {
+        const option       = document.createElement('option');
+        option.value       = p.id_pieza;
+        option.textContent = `${p.nombre} (Stock: ${p.stock_actual})`;
+        selectPieza.appendChild(option);
+      });
+
+      // Footer del modal
+      document.getElementById('modal-detalle-footer').innerHTML = `
+        ${orden.estado === 'Completada' ? `
+          <button class="btn btn-success" id="btn-generar-factura">
+            Generar Factura
           </button>
-          ` : ''}
-        </div>
+        ` : ''}
+        <button class="btn btn-secondary" id="btn-cerrar-detalle">Cerrar</button>
+      `;
 
-        <div id="lista-piezas">
-          ${renderPiezasOT(piezas)}
-        </div>
+      document.getElementById('modal-detalle-ot').classList.remove('hidden');
 
-        <div id="agregar-pieza-form" class="hidden"
-             style="margin-top:var(--spacing-md); padding:var(--spacing-md);
-                    border:1px solid var(--border); border-radius:var(--radius-md);">
-          <div style="font-size:0.8rem; font-weight:600; color:var(--text-secondary);
-                      margin-bottom:var(--spacing-md); text-transform:uppercase;">
-            Agregar Pieza
-          </div>
-          <div style="display:flex; gap:var(--spacing-md); align-items:flex-end; flex-wrap:wrap;">
-            <div class="form-group" style="flex:1; min-width:180px; margin-bottom:0;">
-              <label class="form-label">Pieza</label>
-              <select class="form-control" id="select-pieza">
-                <option value="">Cargando...</option>
-              </select>
-            </div>
-            <div class="form-group" style="width:100px; margin-bottom:0;">
-              <label class="form-label">Cantidad</label>
-              <input type="number" class="form-control" id="cantidad-pieza"
-                     min="1" value="1" />
-            </div>
-            <button class="btn btn-primary btn-sm" id="btn-confirmar-pieza"
-                    style="padding:10px var(--spacing-md);">
-              Agregar
-            </button>
-            <button class="btn btn-secondary btn-sm" id="btn-cancelar-pieza"
-                    style="padding:10px var(--spacing-md);">
-              Cancelar
-            </button>
-          </div>
-          <div id="pieza-error" class="alert alert-danger hidden"
-               style="margin-top:var(--spacing-md); margin-bottom:0;"></div>
-        </div>
+      // Cerrar modal detalle
+      document.getElementById('btn-cerrar-detalle-ot').addEventListener('click', () => {
+        document.getElementById('modal-detalle-ot').classList.add('hidden');
+      });
 
-        <!-- Total -->
-        <div id="total-ot" style="margin-top:var(--spacing-lg); text-align:right;">
-          ${calcularTotalOT(piezas)}
-        </div>
+      document.getElementById('btn-cerrar-detalle').addEventListener('click', () => {
+        document.getElementById('modal-detalle-ot').classList.add('hidden');
+      });
 
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" id="btn-cerrar">Cerrar</button>
-      </div>
-    </div>
-  `;
+      // Agregar pieza
+      document.getElementById('btn-agregar-pieza').addEventListener('click', async () => {
+        const id_pieza = document.getElementById('select-pieza').value;
+        const cantidad = document.getElementById('cantidad-pieza').value;
 
-  document.body.appendChild(modal);
+        if (!id_pieza || !cantidad || cantidad <= 0) {
+          Toast.error('Selecciona una pieza y una cantidad valida.');
+          return;
+        }
 
-  const cerrar = () => {
-    modal.remove();
-    if (onSuccess) onSuccess();
+        try {
+          const resultado = await Api.agregarPieza({
+            id_ot:    id,
+            id_pieza: parseInt(id_pieza),
+            cantidad: parseInt(cantidad),
+          });
+          Toast.success('Pieza agregada exitosamente.');
+          if (resultado.alerta_stock && resultado.alerta_stock.activa) {
+            Toast.warning(resultado.alerta_stock.mensaje);
+          }
+          document.getElementById('modal-detalle-ot').classList.add('hidden');
+          verDetalleOT(id);
+        } catch (error) {
+          Toast.error(error.message);
+        }
+      });
+
+      // Actualizar estado
+      document.getElementById('btn-actualizar-estado').addEventListener('click', async () => {
+        const estado = document.getElementById('select-estado').value;
+        try {
+          await Api.actualizarEstado(id, { estado });
+          Toast.success(`Estado actualizado a "${estado}".`);
+          document.getElementById('modal-detalle-ot').classList.add('hidden');
+          cargarOrdenes();
+        } catch (error) {
+          Toast.error(error.message);
+        }
+      });
+
+      // Generar factura
+      if (orden.estado === 'Completada') {
+        document.getElementById('btn-generar-factura').addEventListener('click', async () => {
+          if (!confirm('Deseas generar la factura para esta OT?')) return;
+          try {
+            await Api.generarFactura({ id_unico_ot: id });
+            Toast.success('Factura generada exitosamente.');
+            document.getElementById('modal-detalle-ot').classList.add('hidden');
+            Router.navigate('facturas');
+          } catch (error) {
+            Toast.error(error.message);
+          }
+        });
+      }
+
+    } catch (error) {
+      Toast.error('Error al cargar el detalle de la OT.');
+    }
   };
 
-  document.getElementById('modal-close').addEventListener('click', cerrar);
-  document.getElementById('btn-cerrar').addEventListener('click', cerrar);
-  modal.addEventListener('click', (e) => { if (e.target === modal) cerrar(); });
-
-  // Cargar piezas del inventario para el select
-  const btnAgregarPieza = document.getElementById('btn-agregar-pieza');
-  if (btnAgregarPieza) {
-    btnAgregarPieza.addEventListener('click', async () => {
-      const form = document.getElementById('agregar-pieza-form');
-      form.classList.remove('hidden');
-
-      const resInv = await api.get('/inventario');
-      if (resInv.ok) {
-        const select = document.getElementById('select-pieza');
-        const piezasDisponibles = resInv.data.piezas.filter(p => p.stock_actual > 0);
-        select.innerHTML = `
-          <option value="">Selecciona una pieza...</option>
-          ${piezasDisponibles.map(p => `
-            <option value="${p.id_pieza}">
-              [${p.codigo_sku}] ${p.nombre} — Stock: ${p.stock_actual}
-              — RD$ ${parseFloat(p.precio_venta).toLocaleString('es-DO')}
-            </option>
-          `).join('')}
-        `;
-      }
-    });
-  }
-
-  document.getElementById('btn-cancelar-pieza')?.addEventListener('click', () => {
-    document.getElementById('agregar-pieza-form').classList.add('hidden');
-  });
-
-  document.getElementById('btn-confirmar-pieza')?.addEventListener('click', async () => {
-    const id_pieza = parseInt(document.getElementById('select-pieza').value);
-    const cantidad = parseInt(document.getElementById('cantidad-pieza').value);
-    const errorEl  = document.getElementById('pieza-error');
-
-    if (!id_pieza) {
-      errorEl.textContent = 'Selecciona una pieza.';
-      errorEl.classList.remove('hidden');
-      return;
+  // Eliminar OT
+  window.eliminarOT = async (id) => {
+    if (!confirm(`Deseas eliminar la OT ${id}? Esta accion no se puede deshacer.`)) return;
+    try {
+      await Api.eliminarOrden(id);
+      Toast.success('Orden de Trabajo eliminada.');
+      cargarOrdenes();
+    } catch (error) {
+      Toast.error(error.message);
     }
+  };
 
-    if (!cantidad || cantidad < 1) {
-      errorEl.textContent = 'La cantidad debe ser mayor a 0.';
-      errorEl.classList.remove('hidden');
-      return;
-    }
-
-    errorEl.classList.add('hidden');
-
-    const res = await api.post('/ordenes/agregar-pieza', {
-      id_ot:    orden.id_unico_ot,
-      id_pieza,
-      cantidad,
-    });
-
-    if (res.ok) {
-      Toast.show('Pieza agregada exitosamente.', 'success');
-
-      if (res.data.alerta_stock?.activa) {
-        Toast.show(res.data.alerta_stock.mensaje, 'warning');
-      }
-
-      // Recargar piezas de la OT
-      const resDetalle = await api.get(`/ordenes/${orden.id_unico_ot}`);
-      if (resDetalle.ok) {
-        const nuevasPiezas = resDetalle.data.piezas;
-        document.getElementById('lista-piezas').innerHTML = renderPiezasOT(nuevasPiezas);
-        document.getElementById('total-ot').innerHTML = calcularTotalOT(nuevasPiezas);
-      }
-
-      document.getElementById('agregar-pieza-form').classList.add('hidden');
-    } else {
-      errorEl.textContent = res.data.mensaje || 'Error al agregar pieza.';
-      errorEl.classList.remove('hidden');
-    }
-  });
-}
-
-function renderPiezasOT(piezas) {
-  if (!piezas || piezas.length === 0) {
-    return `<p style="color:var(--text-disabled); text-align:center;
-                      padding:var(--spacing-md);">
-              No hay piezas agregadas a esta orden.
-            </p>`;
-  }
-
-  return `
-    <div class="table-container" style="border:none;">
-      <table class="table">
-        <thead>
-          <tr>
-            <th>SKU</th>
-            <th>Pieza</th>
-            <th>Cantidad</th>
-            <th>Precio Unit.</th>
-            <th>Subtotal</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${piezas.map(p => `
-            <tr>
-              <td class="font-mono" style="font-size:0.8rem; color:var(--accent);">
-                ${p.codigo_sku}
-              </td>
-              <td style="color:var(--text-primary);">${p.nombre_pieza}</td>
-              <td style="text-align:center;">${p.cantidad_pieza}</td>
-              <td>RD$ ${parseFloat(p.precio_venta).toLocaleString('es-DO',
-                {minimumFractionDigits:2})}</td>
-              <td style="font-weight:600; color:var(--text-primary);">
-                RD$ ${parseFloat(p.subtotal).toLocaleString('es-DO',
-                  {minimumFractionDigits:2})}
-              </td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-    </div>
-  `;
-}
-
-function calcularTotalOT(piezas) {
-  if (!piezas || piezas.length === 0) return '';
-
-  const subtotal = piezas.reduce((acc, p) => acc + parseFloat(p.subtotal), 0);
-  const itbis    = subtotal * 0.18;
-  const total    = subtotal + itbis;
-
-  return `
-    <div style="display:inline-flex; flex-direction:column; gap:var(--spacing-sm);
-                min-width:240px; text-align:right;">
-      <div style="display:flex; justify-content:space-between; gap:var(--spacing-xl);">
-        <span style="color:var(--text-secondary);">Subtotal</span>
-        <span style="color:var(--text-primary);">
-          RD$ ${subtotal.toLocaleString('es-DO', {minimumFractionDigits:2})}
-        </span>
-      </div>
-      <div style="display:flex; justify-content:space-between; gap:var(--spacing-xl);">
-        <span style="color:var(--text-secondary);">ITBIS (18%)</span>
-        <span style="color:var(--text-primary);">
-          RD$ ${itbis.toLocaleString('es-DO', {minimumFractionDigits:2})}
-        </span>
-      </div>
-      <hr class="divider" style="margin:4px 0;">
-      <div style="display:flex; justify-content:space-between; gap:var(--spacing-xl);">
-        <span style="color:var(--accent); font-weight:700;">Total</span>
-        <span style="color:var(--accent); font-weight:700; font-size:1.1rem;">
-          RD$ ${total.toLocaleString('es-DO', {minimumFractionDigits:2})}
-        </span>
-      </div>
-    </div>
-  `;
-}
-
-// Modal cambiar estado
-function abrirModalEstado(id_ot, estadoActual, onSuccess) {
-  const estados = ['Pendiente', 'En Proceso', 'Completada', 'Cancelada'];
-
-  const modal = document.createElement('div');
-  modal.className = 'modal-overlay';
-  modal.innerHTML = `
-    <div class="modal" style="max-width:400px;">
-      <div class="modal-header">
-        <span class="modal-title">Cambiar Estado — ${id_ot}</span>
-        <button class="modal-close" id="modal-close">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" stroke-width="2" style="width:18px;height:18px;">
-            <line x1="18" y1="6" x2="6" y2="18"/>
-            <line x1="6" y1="6" x2="18" y2="18"/>
-          </svg>
-        </button>
-      </div>
-      <div class="modal-body">
-        <div class="form-group">
-          <label class="form-label">Nuevo Estado</label>
-          <select class="form-control" id="nuevo-estado">
-            ${estados.map(e => `
-              <option value="${e}" ${e === estadoActual ? 'selected' : ''}>${e}</option>
-            `).join('')}
-          </select>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" id="btn-cancelar">Cancelar</button>
-        <button class="btn btn-primary" id="btn-guardar">Guardar Estado</button>
-      </div>
-    </div>
-  `;
-
-  document.body.appendChild(modal);
-
-  const cerrar = () => modal.remove();
-  document.getElementById('modal-close').addEventListener('click', cerrar);
-  document.getElementById('btn-cancelar').addEventListener('click', cerrar);
-  modal.addEventListener('click', (e) => { if (e.target === modal) cerrar(); });
-
-  document.getElementById('btn-guardar').addEventListener('click', async () => {
-    const estado = document.getElementById('nuevo-estado').value;
-    const res = await api.patch(`/ordenes/${id_ot}/estado`, { estado });
-    if (res.ok) {
-      Toast.show(`Estado actualizado a "${estado}" exitosamente.`, 'success');
-      cerrar();
-      if (onSuccess) onSuccess();
-    } else {
-      Toast.show(res.data.mensaje || 'Error al actualizar estado.', 'error');
-    }
-  });
-}
+  cargarOrdenes();
+};

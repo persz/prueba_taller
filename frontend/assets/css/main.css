@@ -258,3 +258,25 @@ code {
   height:  48px;
   opacity: 0.4;
 }
+/* --------------------------------------------------------------------------
+   LOGO
+   -------------------------------------------------------------------------- */
+.sidebar-logo {
+  width:     36px;
+  height:    36px;
+  min-width: 36px;
+}
+
+.login-logo img,
+.login-logo svg {
+  width:  64px !important;
+  height: 64px !important;
+}
+
+img[alt="Logo Taller"],
+img[alt="Logo"] {
+  width:  auto;
+  height: auto;
+  max-width:  64px;
+  max-height: 64px;
+}
