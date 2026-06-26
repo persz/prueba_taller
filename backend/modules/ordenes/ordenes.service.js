@@ -1,4 +1,3 @@
-
 /**
  * @file ordenes.service.js
  * @description Logica de negocio para Ordenes de Trabajo.
@@ -111,7 +110,6 @@ const crearOrden = async ({
   mecanico_asignado,
   id_usuario_creador,
 }) => {
-  // Verificar que el cliente existe y obtener sus datos para congelarlos
   const clienteResult = await pool.query(
     'SELECT nombre_completo, cedula_rnc, tipo_cliente FROM clientes WHERE id_cliente = $1',
     [id_cliente]
@@ -123,7 +121,7 @@ const crearOrden = async ({
     throw error;
   }
 
-  const cliente  = clienteResult.rows[0];
+  const cliente   = clienteResult.rows[0];
   const idUnicoOT = await generarIdUnicoOT();
 
   const resultado = await pool.query(
@@ -270,8 +268,8 @@ const actualizarEstadoOrden = async (id_unico_ot, estado) => {
 
   const resultado = await pool.query(
     `UPDATE ordenes_trabajo
-     SET estado        = $1::VARCHAR,
-         fecha_entrega = CASE WHEN $1::VARCHAR = 'Completada' THEN NOW() ELSE fecha_entrega END
+     SET estado        = $1,
+         fecha_entrega = CASE WHEN $1 = 'Completada' THEN NOW() ELSE fecha_entrega END
      WHERE id_unico_ot = $2
      RETURNING id_unico_ot, estado, fecha_entrega`,
     [estado, id_unico_ot]

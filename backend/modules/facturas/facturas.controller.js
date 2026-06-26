@@ -51,7 +51,7 @@ const obtenerFacturaPorId = async (req, res, next) => {
  */
 const generarFactura = async (req, res, next) => {
   try {
-    const { id_unico_ot } = req.body;
+    const { id_unico_ot, mano_de_obra, cargos_extra, descripcion_cargos } = req.body;
 
     if (!id_unico_ot) {
       return res.status(400).json({
@@ -60,7 +60,13 @@ const generarFactura = async (req, res, next) => {
       });
     }
 
-    const factura = await facturasService.generarFactura(id_unico_ot);
+    const factura = await facturasService.generarFactura(
+      id_unico_ot,
+      mano_de_obra || 0,
+      cargos_extra || 0,
+      descripcion_cargos || null
+    );
+
     return res.status(201).json({
       exitoso: true,
       mensaje: 'Factura generada exitosamente.',
@@ -70,7 +76,6 @@ const generarFactura = async (req, res, next) => {
     next(error);
   }
 };
-
 /**
  * @route PATCH /api/v1/facturas/:id/anular
  * @desc Anula una factura emitida

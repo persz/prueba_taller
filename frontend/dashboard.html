@@ -151,7 +151,30 @@
           </button>
           <span class="topbar-title" id="topbar-title">Dashboard</span>
         </div>
+        <div class="topbar-right">
+        <button class="btn-tema" id="btn-tema" title="Cambiar tema">
+          <svg id="icono-tema-oscuro" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+               fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+          <svg id="icono-tema-claro" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+               fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"
+               class="hidden">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+          <span id="texto-tema">Tema Claro</span>
+        </button>
+      </div>
       </header>
+      
 
       <!-- Area de contenido dinamico -->
       <main class="content-area" id="content-area">
@@ -230,6 +253,37 @@
       sidebar.classList.remove('open');
       overlay.classList.remove('active');
     });
+
+    // Tema claro/oscuro
+const btnTema        = document.getElementById('btn-tema');
+const iconoOscuro    = document.getElementById('icono-tema-oscuro');
+const iconoClaro     = document.getElementById('icono-tema-claro');
+const textoTema      = document.getElementById('texto-tema');
+
+const aplicarTema = (tema) => {
+  if (tema === 'claro') {
+    document.body.classList.add('tema-claro');
+    iconoOscuro.classList.add('hidden');
+    iconoClaro.classList.remove('hidden');
+    textoTema.textContent = 'Tema Oscuro';
+  } else {
+    document.body.classList.remove('tema-claro');
+    iconoOscuro.classList.remove('hidden');
+    iconoClaro.classList.add('hidden');
+    textoTema.textContent = 'Tema Claro';
+  }
+};
+
+// Cargar tema guardado
+const temaGuardado = localStorage.getItem('tema') || 'oscuro';
+aplicarTema(temaGuardado);
+
+btnTema.addEventListener('click', () => {
+  const temaActual = localStorage.getItem('tema') || 'oscuro';
+  const nuevoTema  = temaActual === 'oscuro' ? 'claro' : 'oscuro';
+  localStorage.setItem('tema', nuevoTema);
+  aplicarTema(nuevoTema);
+});
 
     // Inicializar router
     Router.init();

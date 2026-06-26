@@ -259,24 +259,34 @@ code {
   opacity: 0.4;
 }
 /* --------------------------------------------------------------------------
-   LOGO
+   TEMA CLARO
    -------------------------------------------------------------------------- */
-.sidebar-logo {
-  width:     36px;
-  height:    36px;
-  min-width: 36px;
+body.tema-claro {
+  --bg-primary:     #F5F5F0;
+  --bg-secondary:   #ECEAE4;
+  --bg-card:        #FFFFFF;
+  --bg-input:       #FFFFFF;
+  --border:         #E0DDD8;
+
+  --accent:         #8B6914;
+  --accent-hover:   #6B5010;
+  --accent-success: #2E7D57;
+  --accent-warning: #B85C1A;
+  --accent-danger:  #9B2C2C;
+
+  --text-primary:   #1A1A1A;
+  --text-secondary: #5A5A5A;
+  --text-disabled:  #A0A0A0;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.2);
 }
 
-.login-logo img,
-.login-logo svg {
-  width:  64px !important;
-  height: 64px !important;
+body.tema-claro ::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
 }
 
-img[alt="Logo Taller"],
-img[alt="Logo"] {
-  width:  auto;
-  height: auto;
-  max-width:  64px;
-  max-height: 64px;
+body.tema-claro ::-webkit-scrollbar-thumb {
+  background: var(--border);
 }

@@ -33,7 +33,7 @@ const facturasRoutes   = require('./modules/facturas/facturas.routes');
 const reportesRoutes   = require('./modules/reportes/reportes.routes');
 
 app.use('/api/v1/auth',       authRoutes);
-app.use('/api/v1/usuarios',   usuariosRoutes);
+app.use('/api/v1/usuarios', usuariosRoutes);
 app.use('/api/v1/clientes',   clientesRoutes);
 app.use('/api/v1/vehiculos',  vehiculosRoutes);
 app.use('/api/v1/inventario', inventarioRoutes);
